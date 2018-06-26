@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>无刷新分页</title>
+	<meta charset="utf-8" />
+	<style>
+	a {
+		width: 20px;
+		line-height: 20px;
+		text-align: center;
+		display: inline-block;
+		background: #ccc;
+		margin-right: 5px;
+	}
+	.class {
+		background: #999;
+	}
+	</style>
+	<!-- 引入外部js文件 -->
+	<script src="./ajax.js"></script>
+</head>
+<body>
+	<table border="1" rules="all">
+		<tr>
+			<td>编号</td>
+			<td>姓名</td>
+			<td>性别</td>
+			<td>年龄</td>
+			<td>学历</td>
+			<td>薪资</td>
+			<td>奖金</td>
+			<td>籍贯</td>
+		</tr>
+	</table>
+	<div></div>
+</body>
+<script>
+// 获取table、div元素
+var table = document.getElementsByTagName('table')[0];
+var div = document.getElementsByTagName('div')[0];
+function create(data){
+	//循环取出数据
+	for(var i=0;i<data.length-1;i++){
+		// 动态创建元素
+		var tr = document.createElement('tr');
+		tr.className = 'add';
+		//获取i对应的元素(即对象),并循环遍历其属性
+		for(key in data[i]){
+			// 动态创建元素
+			var td = document.createElement('td');
+			//添加内容
+			td.innerText = data[i][key];
+			// 将元素td添加至父元素tr
+			tr.appendChild(td);
+		}
+		// 将tr元素添加至父元素table
+		table.appendChild(tr);
+		// console.log(table);
+	}	
+}
+//发送ajax请求
+$.get('./1.php',function(data){
+	create(data);
+	//取出data中最后一个数据,即总页数
+	var pages = parseInt(data[data.length-1]);
+	//循环生成每页链接
+	for(var j=0;j<pages;j++){
+		//创建a元素
+		var a = document.createElement('a');
+		//添加内容
+		a.href = "javascript:void(0)";
+		a.innerText = j+1;
+		// 将其添加到div中
+		div.appendChild(a);
+	}
+},'json');
+
+// 为div添加事件委托
+div.onclick = function(e){
+	//点击页码时先删除原先的数据再向ajax请求当前页的数据,此处有一个问题:表格数据显示有点慢
+	//根据a的值获取当前页码
+	var page = parseInt(e.target.innerText);
+	//改变当前页的背景颜色
+	e.target.className = 'class';
+	// 获取所有的tr元素
+	var trs = document.querySelectorAll('.add');
+	console.log(trs);
+	for(var i=0;i<trs.length;i++){
+		table.removeChild(trs[i]);
+	}
+	//点击时发送ajax请求
+	$.get('./1.php?page='+page,function(data){
+		create(data);
+	},'json');
+}
+
+
+</script>
+</html>
